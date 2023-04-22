@@ -35,8 +35,8 @@ export const App = () => {
 
   const handleSubmit = search => {
     setSearch(search);
-    // setPictures([]);
-    // setPage(1);
+    setPictures([]);
+    setPage(1);
   };
 
   const loadMore = () => {
