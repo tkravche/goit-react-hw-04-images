@@ -1,4 +1,3 @@
-import { Component } from 'react';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -9,85 +8,67 @@ import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { Loader } from './Loader/Loader';
 import { StyledApp } from './App.styled';
+import { useEffect, useState } from 'react';
 
-export default class App extends Component {
-  state = {
-    pictures: [],
-    isLoading: false,
-    page: 1,
-    search: ' ',
-    error: '',
-    totalPictures: null,
-    largeImageUrl: null,
-  };
+export const App = () => {
+  const [pictures, setPictures] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
+  const [totalPictures, setTotalPictures] = useState(null);
+  const [largeImageUrl, setLargeImageUrl] = useState(null);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.search !== this.state.search ||
-      prevState.page !== this.state.page
-    ) {
-      this.getPictures();
+  useEffect(() => {
+    if (search === '') {
+      return;
     }
-  }
-
-  getPictures = () => {
-    this.setState({ isLoading: true });
-    fetchPictures(this.state.search, this.state.page)
+    setIsLoading(true);
+    fetchPictures(search, page)
       .then(({ data: { hits, totalHits } }) => {
-        this.setState(prevState => ({
-          pictures: [...prevState.pictures, ...hits],
-          totalPictures: totalHits,
-        }));
+        setPictures(prevState => [...prevState, ...hits]);
+        setTotalPictures(totalHits);
       })
-      .catch(error => this.setState({ error: error.message }))
-      .finally(() => this.setState({ isLoading: false }));
+      .catch(error => setError(error.message))
+      .finally(() => setIsLoading(false));
+  }, [search, page]);
+
+  const handleSubmit = search => {
+    setSearch(search);
+    // setPictures([]);
+    // setPage(1);
   };
 
-  handleSubmit = search => {
-    this.setState(prevState =>
-      prevState.search !== search
-        ? { pictures: [], search, page: 1 }
-        : { search }
-    );
-  };
-  loadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const loadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  openModal = largePicture => {
-    this.setState({ largeImageUrl: largePicture });
+  const openModal = largePicture => {
+    setLargeImageUrl(largePicture);
   };
 
-  closeModal = () => {
-    this.setState({ largeImageUrl: null });
+  const closeModal = () => {
+    setLargeImageUrl(null);
   };
-  render() {
-    return (
-      <StyledApp>
-        <ToastContainer transition={Slide} draggablePercent={60} />
-        <Searchbar onFormSubmit={this.handleSubmit} />
 
-        {this.state.isLoading && <Loader />}
+  return (
+    <StyledApp>
+      <ToastContainer transition={Slide} draggablePercent={60} />
+      <Searchbar onFormSubmit={handleSubmit} />
 
-        {this.state.pictures.length !== 0 && (
-          <ImageGallery
-            pictures={this.state.pictures}
-            openModal={this.openModal}
-          />
-        )}
+      {isLoading && <Loader />}
 
-        {this.state.pictures.length !== 0 &&
-          this.state.totalPictures !== this.state.pictures.length && (
-            <Button text="Load more" clickHandler={this.loadMore} />
-          )}
+      {pictures.length !== 0 && (
+        <ImageGallery pictures={pictures} openModal={openModal} />
+      )}
 
-        {this.state.largeImageUrl && (
-          <Modal
-            largeImage={this.state.largeImageUrl}
-            onClose={this.closeModal}
-          />
-        )}
-      </StyledApp>
-    );
-  }
-}
+      {pictures.length !== 0 && totalPictures !== pictures.length && (
+        <Button text="Load more" clickHandler={loadMore} />
+      )}
+
+      {largeImageUrl && (
+        <Modal largeImage={largeImageUrl} onClose={closeModal} />
+      )}
+    </StyledApp>
+  );
+};
