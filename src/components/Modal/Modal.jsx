@@ -5,19 +5,19 @@ import { useEffect } from 'react';
 
 export const Modal = ({ largeImage, onClose }) => {
   useEffect(() => {
-    const handleModalClose = e => {
-      if (e.key === 'Escape' || e.target === e.currentTarget) {
-        onClose();
-      }
-    };
     window.addEventListener('keydown', handleModalClose);
     return () => {
       window.removeEventListener('keydown', handleModalClose);
     };
-  }, [onClose]);
+  });
 
+  const handleModalClose = e => {
+    if (e.key === 'Escape' || e.target === e.currentTarget) {
+      onClose();
+    }
+  };
   return (
-    <Overlay onClick={onClose}>
+    <Overlay onClick={handleModalClose}>
       <StyledModal>
         <img src={largeImage} alt="pic" />
       </StyledModal>
