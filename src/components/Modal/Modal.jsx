@@ -3,18 +3,18 @@ import PropTypes from 'prop-types';
 import { Overlay, StyledModal } from './Modal.styled';
 import { useEffect } from 'react';
 
-export const Modal = largeImage => {
+export const Modal = ({ largeImage, onClose }) => {
   useEffect(() => {
     window.addEventListener('keydown', handleModalClose);
-    window.removeEventListener('keydown', handleModalClose);
-  });
-
+    return () => {
+      window.removeEventListener('keydown', handleModalClose);
+    };
+  }, []);
   const handleModalClose = e => {
     if (e.key === 'Escape' || e.target === e.currentTarget) {
-      this.props.onClose();
+      onClose();
     }
   };
-
   return (
     <Overlay onClick={handleModalClose}>
       <StyledModal>
